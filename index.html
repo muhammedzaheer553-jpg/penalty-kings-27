@@ -1,1 +1,864 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penalty Kings 27</title>
+<style>
+:root {
+  --gold: #ffd166;
+  --green: #073b2a;
+  --panel: #102b24;
+  --text: #f5fff8;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(ellipse at top, #185b3c 0%, #071d17 65%, #04110e 100%);
+  min-height: 100vh;
+}
+header {
+  padding: 20px 14px;
+  text-align: center;
+  border-bottom: 1px solid #ffffff20;
+}
+.logo {
+  font-size: clamp(25px, 5vw, 42px);
+  font-weight: 1000;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-shadow: 0 3px 20px #ffc85745;
+}
+.subtitle {
+  color: #c4d8cd;
+  margin-top: 7px;
+  font-size: 12px;
+  letter-spacing: 3px;
+}
+main {
+  max-width: 1100px;
+  padding: 16px;
+  margin: auto;
+}
+.panel {
+  background: #10251fe8;
+  border: 1px solid #ffffff1a;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 30px #00000018;
+}
+.team-selectors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+label {
+  display: block;
+  color: #c9ded2;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+select, button {
+  font: inherit;
+}
+select {
+  width: 100%;
+  padding: 12px;
+  color: white;
+  background: #183b2e;
+  border: 1px solid #557565;
+  border-radius: 9px;
+}
+.scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.team-score {
+  min-width: 0;
+}
+.team-name {
+  font-size: 14px;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+.score {
+  font-size: clamp(36px, 7vw, 56px);
+  line-height: 1.15;
+  font-weight: 1000;
+  color: var(--gold);
+}
+.vs {
+  color: #9db5a8;
+  font-weight: bold;
+  font-size: 12px;
+}
+.phase {
+  text-align: center;
+  margin-top: 12px;
+  color: var(--gold);
+  font-weight: bold;
+  font-size: 13px;
+}
+.stadium {
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #ffffff25;
+  background: #07150f;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+  touch-action: manipulation;
+}
+.hint {
+  padding: 9px;
+  color: #bed3c6;
+  font-size: 12px;
+  text-align: center;
+}
+.current-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.player-shirt {
+  width: 52px;
+  height: 55px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  background: #244a39;
+  border: 1px solid #ffffff30;
+  flex-shrink: 0;
+}
+.player-info { flex: 1; min-width: 0; }
+.player-info strong { display: block; font-size: 17px; }
+.player-info small { display: block; color: #b9d0c3; margin-top: 5px; }
+.kick-number {
+  color: var(--gold);
+  font-weight: bold;
+  font-size: 12px;
+  text-align: right;
+}
+.power-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 15px 0;
+}
+.power-row label { margin: 0; white-space: nowrap; }
+input[type="range"] { width: 100%; accent-color: var(--gold); }
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+button {
+  border: 0;
+  padding: 13px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 800;
+  transition: transform .15s, opacity .15s;
+}
+button:active { transform: scale(.98); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.primary {
+  color: #13251b;
+  background: var(--gold);
+}
+.secondary {
+  color: white;
+  background: #285342;
+  border: 1px solid #ffffff20;
+}
+.message {
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 12px 5px 2px;
+  min-height: 42px;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.stat {
+  background: #17372b;
+  padding: 12px 5px;
+  border-radius: 10px;
+}
+.stat strong { display: block; font-size: 23px; color: var(--gold); }
+.stat small { color: #bdd2c5; font-size: 11px; }
+.player-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.player-chip {
+  font-size: 11px;
+  padding: 7px 9px;
+  border: 1px solid #52705f;
+  color: #cce1d4;
+  border-radius: 20px;
+}
+.player-chip.done {
+  color: #7e9a89;
+  background: #071a12;
+  text-decoration: line-through;
+}
+.player-chip.active {
+  color: #18251b;
+  background: var(--gold);
+  border-color: var(--gold);
+  font-weight: bold;
+}
+.rules {
+  color: #c6d9ce;
+  font-size: 13px;
+  line-height: 1.7;
+}
+footer {
+  text-align: center;
+  color: #829d8e;
+  font-size: 11px;
+  padding: 18px;
+}
+@media (max-width: 480px) {
+  main { padding: 10px; }
+  .panel { padding: 12px; }
+  .team-name { font-size: 12px; }
+  .actions { grid-template-columns: 1fr; }
+  .current-player { gap: 8px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚽ PENALTY KINGS 27</div>
+  <div class="subtitle">PICK YOUR TEAM · TAKE THE SHOT · WIN THE CUP</div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="team-selectors">
+      <div>
+        <label for="myTeam">YOUR TEAM</label>
+        <select id="myTeam">
+          <option>FC Barcelona</option>
+          <option>Real Madrid</option>
+          <option>Manchester City</option>
+          <option>Liverpool</option>
+          <option>Paris Saint-Germain</option>
+          <option>Argentina</option>
+          <option>Brazil</option>
+          <option>France</option>
+          <option>Portugal</option>
+          <option>India</option>
+        </select>
+      </div>
+      <div>
+        <label for="opTeam">OPPONENT</label>
+        <select id="opTeam">
+          <option>Real Madrid</option>
+          <option>FC Barcelona</option>
+          <option>Manchester City</option>
+          <option>Liverpool</option>
+          <option>Paris Saint-Germain</option>
+          <option>Argentina</option>
+          <option>Brazil</option>
+          <option>France</option>
+          <option>Portugal</option>
+          <option>India</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="scoreboard">
+      <div class="team-score">
+        <div class="team-name" id="myName">FC Barcelona</div>
+        <div class="score" id="myScore">0</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="team-score">
+        <div class="team-name" id="opName">Real Madrid</div>
+        <div class="score" id="opScore">0</div>
+      </div>
+    </div>
+    <div class="phase" id="phase">REGULAR SHOOTOUT · KICK 1 OF 10</div>
+  </section>
+
+  <section class="panel">
+    <div class="stadium">
+      <canvas id="game" width="720" height="420"
+        aria-label="Penalty shootout game. Click to choose your shot target."></canvas>
+    </div>
+    <div class="hint">🎯 Goal-ന്റെ ഉള്ളിലോ പുറത്തോ click ചെയ്ത് aim തിരഞ്ഞെടുക്കൂ.</div>
+  </section>
+
+  <section class="panel">
+    <div class="current-player">
+      <div class="player-shirt">👕</div>
+      <div class="player-info">
+        <strong id="playerName">Player 1</strong>
+        <small id="playerTeam">FC Barcelona · Your penalty taker</small>
+      </div>
+      <div class="kick-number" id="kickNumber">KICK 1</div>
+    </div>
+
+    <div class="power-row">
+      <label for="power">POWER</label>
+      <input id="power" type="range" min="30" max="100" value="75">
+      <strong id="powerValue">75%</strong>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="kickBtn">⚽ TAKE PENALTY</button>
+      <button class="secondary" id="resetBtn">↻ NEW MATCH</button>
+    </div>
+    <div class="message" id="message">Choose your target, then take the shot!</div>
+  </section>
+
+  <section class="panel">
+    <h3 style="margin-top:0">📊 Match Statistics</h3>
+    <div class="stats">
+      <div class="stat"><strong id="myGoals">0</strong><small>YOUR GOALS</small></div>
+      <div class="stat"><strong id="opGoals">0</strong><small>OPPONENT GOALS</small></div>
+      <div class="stat"><strong id="saves">0</strong><small>SAVES</small></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3 style="margin-top:0">👥 Your Penalty Takers</h3>
+    <div class="player-list" id="playerList"></div>
+    <p class="rules">
+      ഓരോ kick-നും അടുത്ത player സ്വയം തിരഞ്ഞെടുക്കപ്പെടും. ആദ്യ 10 kicks-ൽ
+      10 വ്യത്യസ്ത players ഉപയോഗിക്കും. 10 kicks കഴിഞ്ഞും സമനിലയെങ്കിൽ
+      Sudden Death ആരംഭിക്കും. Sudden Death-ൽ ഓരോ ടീമും ഒരു kick വീതം
+      എടുക്കും; തുല്യ kicks കഴിഞ്ഞ് score വ്യത്യാസമുണ്ടായാൽ match തീരും.
+    </p>
+  </section>
+</main>
+
+<footer>Penalty Kings 27 · Browser Prototype</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $("game");
+const ctx = canvas.getContext("2d");
+
+const rosters = {
+  "FC Barcelona": [
+    "Robert Lewandowski", "Lamine Yamal", "Raphinha",
+    "Pedri", "Gavi", "Frenkie de Jong", "Ferran Torres",
+    "Dani Olmo", "Ronald Araújo", "Jules Koundé", "Player 11"
+  ],
+  "Real Madrid": [
+    "Kylian Mbappé", "Vinícius Júnior", "Jude Bellingham",
+    "Rodrygo", "Federico Valverde", "Arda Güler",
+    "Eduardo Camavinga", "Aurélien Tchouaméni",
+    "Antonio Rüdiger", "Éder Militão", "Player 11"
+  ],
+  "Manchester City": [
+    "Erling Haaland", "Phil Foden", "Kevin De Bruyne",
+    "Bernardo Silva", "Jérémy Doku", "Omar Marmoush",
+    "Rayan Cherki", "Rodri", "Mateo Kovačić",
+    "Rúben Dias", "Player 11"
+  ],
+  "Liverpool": [
+    "Mohamed Salah", "Virgil van Dijk", "Alexis Mac Allister",
+    "Dominik Szoboszlai", "Cody Gakpo", "Luis Díaz",
+    "Darwin Núñez", "Ryan Gravenberch", "Diogo Jota",
+    "Ibrahima Konaté", "Player 11"
+  ],
+  "Paris Saint-Germain": [
+    "Ousmane Dembélé", "Désiré Doué", "Khvicha Kvaratskhelia",
+    "Bradley Barcola", "Achraf Hakimi", "Vitinha",
+    "João Neves", "Fabián Ruiz", "Warren Zaïre-Emery",
+    "Marquinhos", "Player 11"
+  ],
+  "Argentina": [
+    "Lionel Messi", "Julián Álvarez", "Lautaro Martínez",
+    "Ángel Di María", "Alexis Mac Allister", "Enzo Fernández",
+    "Rodrigo De Paul", "Nicolás González", "Nicolás Otamendi",
+    "Cristian Romero", "Player 11"
+  ],
+  "Brazil": [
+    "Neymar", "Vinícius Júnior", "Raphinha", "Rodrygo",
+    "Endrick", "Bruno Guimarães", "Casemiro",
+    "Lucas Paquetá", "Marquinhos", "Éder Militão", "Player 11"
+  ],
+  "France": [
+    "Kylian Mbappé", "Ousmane Dembélé", "Michael Olise",
+    "Olivier Giroud", "Antoine Griezmann", "Aurélien Tchouaméni",
+    "Eduardo Camavinga", "Adrien Rabiot", "William Saliba",
+    "Jules Koundé", "Player 11"
+  ],
+  "Portugal": [
+    "Cristiano Ronaldo", "Bruno Fernandes", "Bernardo Silva",
+    "Rafael Leão", "Diogo Jota", "João Félix",
+    "Vitinha", "João Neves", "Rúben Dias", "Nuno Mendes", "Player 11"
+  ],
+  "India": [
+    "Sunil Chhetri", "Gurpreet Singh Sandhu", "Brandon Fernandes",
+    "Lallianzuala Chhangte", "Sahal Abdul Samad", "Liston Colaco",
+    "Anwar Ali", "Sandesh Jhingan", "Rahul Bheke",
+    "Apuia", "Player 11"
+  ]
+};
+
+const teamColors = {
+  "FC Barcelona": "#a50044",
+  "Real Madrid": "#e9e9e9",
+  "Manchester City": "#6cabdd",
+  "Liverpool": "#c8102e",
+  "Paris Saint-Germain": "#004170",
+  "Argentina": "#75bce8",
+  "Brazil": "#e5d000",
+  "France": "#2045a0",
+  "Portugal": "#d32332",
+  "India": "#ff8c27"
+};
+
+let myScore = 0;
+let opScore = 0;
+let saves = 0;
+let myKicks = 0;
+let opKicks = 0;
+let suddenDeath = false;
+let finished = false;
+let busy = false;
+let aim = { x: 360, y: 135 };
+let ball = { x: 360, y: 355 };
+let keeper = { x: 360, y: 150 };
+let ballAnimation = null;
+let currentMessage = "Choose your target, then take the shot!";
+let messageTimer = null;
+
+function myRoster() {
+  return rosters[$("myTeam").value] || rosters["FC Barcelona"];
+}
+function opRoster() {
+  return rosters[$("opTeam").value] || rosters["Real Madrid"];
+}
+function currentPlayer() {
+  // First 10 kicks use different players. Sudden Death cycles through them.
+  return myRoster()[myKicks % 10];
+}
+function kickLabel() {
+  if (suddenDeath) return "SUDDEN DEATH · ROUND " + (myKicks - 10 + 1);
+  return "REGULAR SHOOTOUT · KICK " + (myKicks + 1) + " OF 10";
+}
+
+function updateUI() {
+  $("myName").textContent = $("myTeam").value;
+  $("opName").textContent = $("opTeam").value;
+  $("myScore").textContent = myScore;
+  $("opScore").textContent = opScore;
+  $("myGoals").textContent = myScore;
+  $("opGoals").textContent = opScore;
+  $("saves").textContent = saves;
+  $("phase").textContent = finished
+    ? "MATCH FINISHED"
+    : kickLabel();
+  $("playerName").textContent = currentPlayer();
+  $("playerTeam").textContent = $("myTeam").value + " · Your penalty taker";
+  $("kickNumber").textContent = suddenDeath
+    ? "SUDDEN DEATH"
+    : "KICK " + (myKicks + 1) + " / 10";
+  $("kickBtn").disabled = busy || finished;
+  $("resetBtn").disabled = false;
+  renderPlayerList();
+  draw();
+}
+
+function renderPlayerList() {
+  const list = $("playerList");
+  list.innerHTML = "";
+  myRoster().slice(0, 10).forEach((name, index) => {
+    const chip = document.createElement("span");
+    chip.className = "player-chip";
+    chip.textContent = (index + 1) + ". " + name;
+    if (index < Math.min(myKicks, 10)) chip.classList.add("done");
+    if (index === myKicks % 10 && !finished) chip.classList.add("active");
+    list.appendChild(chip);
+  });
+}
+
+function draw() {
+  const w = canvas.width, h = canvas.height;
+
+  // Night stadium
+  const sky = ctx.createLinearGradient(0, 0, 0, h);
+  sky.addColorStop(0, "#101f34");
+  sky.addColorStop(0.45, "#263d45");
+  sky.addColorStop(1, "#12492d");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h);
+
+  // Stadium crowd
+  for (let i = 0; i < 260; i++) {
+    const x = (i * 71) % w;
+    const y = 25 + ((i * 37) % 95);
+    ctx.fillStyle = ["#8e9d9b", "#e2bb73", "#8f424d", "#4b8b71"][i % 4];
+    ctx.fillRect(x, y, 3, 4);
+  }
+
+  // Floodlights
+  for (const x of [75, 645]) {
+    ctx.fillStyle = "#fff3bd";
+    ctx.beginPath();
+    ctx.arc(x, 30, 19, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#fff8d0";
+    ctx.beginPath();
+    ctx.arc(x, 30, 9, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Pitch
+  ctx.fillStyle = "#197544";
+  ctx.fillRect(0, 125, w, h - 125);
+  for (let i = 0; i < 8; i++) {
+    ctx.fillStyle = i % 2 ? "#1b7b46" : "#176d3e";
+    ctx.fillRect(0, 125 + i * 37, w, 37);
+  }
+
+  // Penalty box
+  ctx.strokeStyle = "#d9f1d9";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(125, 120, 470, 245);
+  ctx.strokeRect(225, 120, 270, 105);
+
+  // Goal
+  ctx.fillStyle = "#eaf4ee";
+  ctx.fillRect(184, 54, 352, 166);
+  ctx.fillStyle = "#f9ffff";
+  ctx.fillRect(194, 64, 332, 146);
+
+  // Goal net
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(194, 64, 332, 146);
+  ctx.clip();
+  ctx.strokeStyle = "#b5c9c4";
+  ctx.lineWidth = 1;
+  for (let x = 194; x <= 526; x += 18) {
+    ctx.beginPath(); ctx.moveTo(x, 64); ctx.lineTo(x, 210); ctx.stroke();
+  }
+  for (let y = 64; y <= 210; y += 15) {
+    ctx.beginPath(); ctx.moveTo(194, y); ctx.lineTo(526, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  // Goal frame
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 8;
+  ctx.strokeRect(188, 58, 344, 158);
+
+  // Target marker
+  ctx.beginPath();
+  ctx.arc(aim.x, aim.y, 12, 0, Math.PI * 2);
+  ctx.strokeStyle = "#ffbd35";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(aim.x, aim.y, 3, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffbd35";
+  ctx.fill();
+
+  // Goalkeeper
+  ctx.save();
+  ctx.translate(keeper.x, keeper.y);
+  ctx.fillStyle = "#ffd166";
+  ctx.beginPath();
+  ctx.arc(0, -22, 13, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#273b9b";
+  ctx.fillRect(-15, -8, 30, 38);
+  ctx.strokeStyle = "#273b9b";
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.moveTo(-12, 0); ctx.lineTo(-31, 13);
+  ctx.moveTo(12, 0); ctx.lineTo(31, 13);
+  ctx.stroke();
+  ctx.strokeStyle = "#f4c9a2";
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(-31, 13); ctx.lineTo(-38, 18);
+  ctx.moveTo(31, 13); ctx.lineTo(38, 18);
+  ctx.stroke();
+  ctx.strokeStyle = "#17241e";
+  ctx.lineWidth = 7;
+  ctx.beginPath();
+  ctx.moveTo(-7, 22); ctx.lineTo(-10, 48);
+  ctx.moveTo(7, 22); ctx.lineTo(10, 48);
+  ctx.stroke();
+  ctx.restore();
+
+  // Penalty taker
+  ctx.save();
+  ctx.translate(360, 315);
+  ctx.fillStyle = teamColors[$("myTeam").value] || "#b52a47";
+  ctx.beginPath();
+  ctx.moveTo(-18, -35); ctx.lineTo(18, -35);
+  ctx.lineTo(24, 8); ctx.lineTo(-24, 8);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#d8a77b";
+  ctx.beginPath(); ctx.arc(0, -48, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#e6d3b2";
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.moveTo(-14, -27); ctx.lineTo(-28, -7);
+  ctx.moveTo(14, -27); ctx.lineTo(28, -7);
+  ctx.stroke();
+  ctx.strokeStyle = "#17241e";
+  ctx.lineWidth = 9;
+  ctx.beginPath();
+  ctx.moveTo(-9, 7); ctx.lineTo(-14, 35);
+  ctx.moveTo(9, 7); ctx.lineTo(15, 35);
+  ctx.stroke();
+  ctx.restore();
+
+  // Ball
+  ctx.fillStyle = "#00000035";
+  ctx.beginPath();
+  ctx.ellipse(ball.x + 3, ball.y + 5, 12, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#1c2824";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(ball.x - 5, ball.y - 4);
+  ctx.lineTo(ball.x + 5, ball.y - 4);
+  ctx.lineTo(ball.x + 7, ball.y + 4);
+  ctx.lineTo(ball.x, ball.y + 8);
+  ctx.lineTo(ball.x - 7, ball.y + 3);
+  ctx.closePath();
+  ctx.stroke();
+
+  if (finished) {
+    ctx.fillStyle = "#04130edb";
+    ctx.fillRect(0, 0, w, h);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffd166";
+    ctx.font = "bold 34px Arial";
+    ctx.fillText(myScore > opScore ? "YOU WIN!" :
+      myScore < opScore ? "OPPONENT WINS!" : "DRAW!", w / 2, 180);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 22px Arial";
+    ctx.fillText(myScore + "  -  " + opScore, w / 2, 222);
+    ctx.font = "15px Arial";
+    ctx.fillText("Press NEW MATCH to play again", w / 2, 258);
+  }
+}
+
+canvas.addEventListener("click", event => {
+  if (busy || finished) return;
+  const rect = canvas.getBoundingClientRect();
+  aim = {
+    x: (event.clientX - rect.left) * canvas.width / rect.width,
+    y: (event.clientY - rect.top) * canvas.height / rect.height
+  };
+  draw();
+});
+
+$("power").addEventListener("input", () => {
+  $("powerValue").textContent = $("power").value + "%";
+});
+
+function showMessage(message) {
+  currentMessage = message;
+  $("message").textContent = message;
+}
+
+function finishMatch(message) {
+  finished = true;
+  busy = false;
+  showMessage(message + " Final score: " + myScore + " - " + opScore);
+  updateUI();
+}
+
+function checkAfterBothKicked() {
+  // Called only after both teams have taken the same number of kicks.
+  if (myKicks !== opKicks) return false;
+
+  if (myKicks >= 10) {
+    if (myScore !== opScore) {
+      finishMatch(myScore > opScore
+        ? "🏆 YOU WIN THE SHOOTOUT!"
+        : "🏆 OPPONENT WINS THE SHOOTOUT!");
+      return true;
+    }
+
+    suddenDeath = true;
+    showMessage("⚡ SUDDEN DEATH! Next goal can decide the match.");
+  }
+
+  if (suddenDeath && myKicks > 10 && myScore !== opScore) {
+    finishMatch(myScore > opScore
+      ? "🏆 YOU WIN SUDDEN DEATH!"
+      : "🏆 OPPONENT WINS SUDDEN DEATH!");
+    return true;
+  }
+
+  return false;
+}
+
+function opponentKick() {
+  if (finished) return;
+
+  const roster = opRoster();
+  const opponentPlayer = roster[opKicks % 10];
+  showMessage(opponentPlayer + " is taking the penalty...");
+
+  // Simulated opponent kick for this browser prototype.
+  const goal = Math.random() < 0.72;
+  opKicks++;
+
+  if (goal) {
+    opScore++;
+    showMessage("⚽ " + opponentPlayer + " scores!");
+  } else {
+    saves++;
+    showMessage("🧤 Opponent misses! You make the save!");
+  }
+
+  updateUI();
+
+  if (checkAfterBothKicked()) return;
+
+  busy = false;
+  updateUI();
+
+  if (suddenDeath) {
+    showMessage("⚡ Sudden Death! Your next player: " + currentPlayer());
+  } else {
+    showMessage("Your turn! " + currentPlayer() + " is ready.");
+  }
+}
+
+function takePenalty() {
+  if (busy || finished) return;
+
+  busy = true;
+  $("kickBtn").disabled = true;
+
+  const start = { x: 360, y: 355 };
+  const target = { x: aim.x, y: aim.y };
+  const power = Number($("power").value);
+
+  const insideGoal =
+    target.x >= 194 && target.x <= 526 &&
+    target.y >= 64 && target.y <= 210;
+
+  const diveX = 190 + Math.random() * 340;
+  const keeperSaves = Math.random() < 0.48;
+  const caught = insideGoal && keeperSaves &&
+    Math.abs(target.x - diveX) < 92;
+
+  showMessage(currentPlayer() + " takes the shot!");
+
+  const startTime = performance.now();
+  const duration = 620 - power * 3;
+
+  function frame(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - t, 2);
+
+    ball.x = start.x + (target.x - start.x) * eased;
+    ball.y = start.y + (target.y - start.y) * eased;
+    keeper.x = 360 + (diveX - 360) * Math.min(1, t * 1.4);
+    draw();
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+      return;
+    }
+
+    myKicks++;
+
+    if (!insideGoal) {
+      showMessage("❌ MISS! The shot goes wide.");
+    } else if (caught) {
+      saves++;
+      showMessage("🧤 SAVED! The goalkeeper stops your shot.");
+    } else {
+      myScore++;
+      showMessage("⚽ GOAL! Brilliant penalty!");
+    }
+
+    ball = { x: 360, y: 355 };
+    keeper = { x: 360, y: 150 };
+    updateUI();
+
+    // The opponent takes its kick before the round is decided.
+    setTimeout(opponentKick, 900);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+function resetMatch() {
+  myScore = 0;
+  opScore = 0;
+  saves = 0;
+  myKicks = 0;
+  opKicks = 0;
+  suddenDeath = false;
+  finished = false;
+  busy = false;
+  aim = { x: 360, y: 135 };
+  ball = { x: 360, y: 355 };
+  keeper = { x: 360, y: 150 };
+
+  if ($("myTeam").value === $("opTeam").value) {
+    $("opTeam").selectedIndex =
+      ($("myTeam").selectedIndex + 1) % $("opTeam").options.length;
+  }
+
+  showMessage("New match! Choose your target and take the first penalty.");
+  updateUI();
+}
+
+$("kickBtn").addEventListener("click", takePenalty);
+$("resetBtn").addEventListener("click", resetMatch);
+
+$("myTeam").addEventListener("change", () => {
+  if ($("myTeam").value === $("opTeam").value) {
+    $("opTeam").selectedIndex =
+      ($("myTeam").selectedIndex + 1) % $("opTeam").options.length;
+  }
+  updateUI();
+});
+
+$("opTeam").addEventListener("change", () => {
+  if ($("myTeam").value === $("opTeam").value) {
+    $("myTeam").selectedIndex =
+      ($("opTeam").selectedIndex + 1) % $("myTeam").options.length;
+  }
+  updateUI();
+});
+
+updateUI();
+</script>
+</body>
+</html>
