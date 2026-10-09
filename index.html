@@ -3,590 +3,513 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Penalty Kings 27 | 3D Football</title>
-
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#06120e;color:white;font-family:Arial,sans-serif;overflow:hidden}
-#game{position:fixed;inset:0}
-canvas{display:block;width:100%;height:100%}
-.panel{position:fixed;z-index:3;background:#07150fdd;border:1px solid #ffffff35;
-border-radius:12px;padding:12px;backdrop-filter:blur(8px)}
-#top{top:12px;left:50%;transform:translateX(-50%);text-align:center;min-width:290px}
-#score{font-size:30px;font-weight:900;letter-spacing:2px}
-#sub{font-size:12px;color:#c5e8d0;margin-top:5px}
-#left{top:12px;left:12px;width:190px}
-#right{top:12px;right:12px;width:190px}
-#bottom{bottom:12px;left:50%;transform:translateX(-50%);width:min(680px,95vw);text-align:center}
-select,button{border:0;border-radius:8px;padding:10px;margin:3px;background:#e9f5ee;color:#10271b;font-weight:bold}
-button{cursor:pointer}
-button.primary{background:#36e477}
-button:disabled{opacity:.5}
-label{font-size:12px;color:#b8d9c4}
-.small{font-size:12px;color:#d0e9d8;line-height:1.5}
-#message{font-size:16px;font-weight:bold;min-height:22px;margin:5px}
-#power{width:100%;accent-color:#36e477}
-#hint{font-size:12px;color:#c4e3cf}
-#loading{position:fixed;inset:0;z-index:10;background:#06120e;display:grid;place-items:center;text-align:center;padding:20px}
-#loading h1{font-size:clamp(25px,5vw,48px)}
-@media(max-width:650px){
- #left,#right{top:auto;bottom:125px;width:145px;padding:8px}
- #left{left:7px} #right{right:7px}
- #top{top:7px;min-width:220px;padding:8px}
- #score{font-size:23px}
- #bottom{bottom:7px;padding:8px}
- select,button{padding:8px;font-size:12px}
-}
-</style>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penalty Kings 27</title>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"}}
 </script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#06130e;color:white;font-family:Arial,sans-serif}
+#game{position:fixed;inset:0}
+canvas{width:100%;height:100%;display:block}
+.panel{position:fixed;z-index:2;background:#07180fe8;border:1px solid #ffffff30;
+border-radius:12px;padding:10px;box-shadow:0 4px 20px #0006}
+#header{top:10px;left:50%;transform:translateX(-50%);text-align:center;min-width:260px}
+#title{font-weight:900;letter-spacing:2px;font-size:15px}
+#score{font-size:30px;font-weight:900;margin:4px}
+#round{font-size:12px;color:#c4e6d0}
+#teams{top:10px;left:10px;width:165px}
+#opponent{top:10px;right:10px;width:165px}
+select,button{border:0;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer}
+select{width:100%;margin:5px 0;background:#f2f5f2;color:#14231a}
+button{background:#eaf3ec;color:#13251a;margin:3px}
+button:disabled{opacity:.35;cursor:not-allowed}
+.green{background:#39e878}
+#controls{bottom:10px;left:50%;transform:translateX(-50%);width:min(520px,96vw);text-align:center}
+#status{font-size:15px;font-weight:bold;min-height:20px;margin:4px}
+#instruction{font-size:12px;color:#c7e2d0;min-height:17px}
+#power{width:100%;accent-color:#39e878}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:5px}
+.grid button{margin:0;padding:10px 4px;min-height:39px}
+#defendControls{display:none}
+.small{font-size:12px;color:#d0e7d7;line-height:1.6}
+@media(max-width:600px){
+ #teams,#opponent{top:auto;bottom:205px;width:135px;padding:7px}
+ #teams{left:5px}#opponent{right:5px}
+ #header{top:5px;min-width:205px;padding:7px}
+ #title{font-size:12px}#score{font-size:24px}
+ #controls{bottom:5px;padding:7px}
+ button{font-size:11px;padding:8px 4px}
+ .grid button{font-size:10px}
+}
+</style>
 </head>
 <body>
 <div id="game"></div>
 
-<div id="loading">
- <div>
-  <h1>⚽ PENALTY KINGS 27</h1>
-  <p>Loading 3D stadium...</p>
-  <p class="small">An internet connection is needed to load the 3D engine.</p>
- </div>
+<div id="header" class="panel">
+ <div id="title">⚽ PENALTY KINGS 27</div>
+ <div id="score">0 - 0</div>
+ <div id="round">PENALTY SHOOTOUT · ROUND 1 / 5</div>
 </div>
 
-<div id="top" class="panel">
- <div style="font-weight:900;letter-spacing:2px">PENALTY KINGS 27</div>
- <div id="score">0 — 0</div>
- <div id="sub">PENALTY SHOOTOUT · 0 / 5</div>
-</div>
-
-<div id="left" class="panel">
- <label>YOUR TEAM</label><br>
- <select id="myTeam" style="width:100%">
-  <option value="Barcelona">FC Barcelona</option>
-  <option value="Madrid">Real Madrid</option>
-  <option value="City">Manchester City</option>
-  <option value="Liverpool">Liverpool</option>
-  <option value="Argentina">Argentina</option>
-  <option value="Brazil">Brazil</option>
-  <option value="France">France</option>
-  <option value="Portugal">Portugal</option>
-  <option value="India">India</option>
+<div id="teams" class="panel">
+ <b>YOUR TEAM</b>
+ <select id="myTeam">
+  <option>FC Barcelona</option><option>Real Madrid</option>
+  <option>Manchester City</option><option>Liverpool</option>
+  <option>Argentina</option><option>Brazil</option>
+  <option>France</option><option>Portugal</option><option>India</option>
  </select>
- <div class="small">Your score: <b id="myScore">0</b></div>
- <div class="small">Shots: <b id="myShots">0</b></div>
+ <div class="small">Goals: <b id="myGoals">0</b></div>
+ <div class="small">Shots: <b id="myCount">0</b></div>
 </div>
 
-<div id="right" class="panel">
- <label>OPPONENT</label><br>
- <select id="opTeam" style="width:100%">
-  <option value="Madrid">Real Madrid</option>
-  <option value="Barcelona">FC Barcelona</option>
-  <option value="City">Manchester City</option>
-  <option value="Liverpool">Liverpool</option>
-  <option value="Argentina">Argentina</option>
-  <option value="Brazil">Brazil</option>
-  <option value="France">France</option>
-  <option value="Portugal">Portugal</option>
-  <option value="India">India</option>
+<div id="opponent" class="panel">
+ <b>OPPONENT</b>
+ <select id="opTeam">
+  <option>Real Madrid</option><option>FC Barcelona</option>
+  <option>Manchester City</option><option>Liverpool</option>
+  <option>Argentina</option><option>Brazil</option>
+  <option>France</option><option>Portugal</option><option>India</option>
  </select>
- <div class="small">Opponent score: <b id="opScore">0</b></div>
- <div class="small">Shots: <b id="opShots">0</b></div>
+ <div class="small">Goals: <b id="opGoals">0</b></div>
+ <div class="small">Shots: <b id="opCount">0</b></div>
 </div>
 
-<div id="bottom" class="panel">
- <div id="message">Choose your target and take the shot!</div>
- <label for="power">SHOT POWER</label>
- <input id="power" type="range" min="35" max="100" value="75">
- <div>
-  <button id="shoot" class="primary">⚽ SHOOT</button>
-  <button id="audio">🔊 ENABLE SOUND</button>
-  <button id="new">↻ NEW MATCH</button>
+<div id="controls" class="panel">
+ <div id="status">Choose a target and take your penalty!</div>
+ <div id="instruction">Click inside the goal area to aim.</div>
+
+ <div id="attackControls">
+  <label for="power">SHOT POWER</label>
+  <input id="power" type="range" min="35" max="100" value="75">
+  <div><button id="shoot" class="green">⚽ SHOOT</button></div>
  </div>
- <div id="hint">Click the goal area to aim, then press SHOOT.</div>
+
+ <div id="defendControls">
+  <b>GOALKEEPER CONTROLS</b>
+  <div class="grid">
+   <button data-dive="high-left">↖ HIGH LEFT</button>
+   <button data-dive="high-center">↑ HIGH CENTER</button>
+   <button data-dive="high-right">HIGH RIGHT ↗</button>
+   <button data-dive="low-left">↙ LOW LEFT</button>
+   <button data-dive="low-center">↓ LOW CENTER</button>
+   <button data-dive="low-right">LOW RIGHT ↘</button>
+  </div>
+  <div class="small">Choose where to dive before the ball reaches the goal!</div>
+ </div>
+
+ <div style="margin-top:5px">
+  <button id="sound">🔊 ENABLE SOUND</button>
+  <button id="newMatch">↻ NEW MATCH</button>
+ </div>
 </div>
 
 <script type="module">
 import * as THREE from "three";
 
-const $ = id => document.getElementById(id);
-const game = $("game");
+const $=id=>document.getElementById(id);
+const host=$("game");
 
 let scene,camera,renderer,clock;
-let player,keeper,ball,targetMarker;
-let playerParts=[],keeperParts=[];
-let myScore=0,opScore=0,myShots=0,opShots=0;
-let busy=false,matchOver=false,aimX=0,aimY=1.5;
-let ballStart=new THREE.Vector3(0,.22,6.2);
-let ballEnd=new THREE.Vector3();
-let shotStart=0,shotDuration=850,shotKind="";
-let audioContext=null,masterGain=null,crowdGain=null,musicTimer=null;
-let audioEnabled=false;
-let crowdSource=null;
-let playerShirt=null;
-let keeperHome=new THREE.Vector3(0,0,-11.65);
-const teamColors={
- Barcelona:0xa50044,Madrid:0xf1f1f1,City:0x58b7ff,
- Liverpool:0xc8102e,Argentina:0x7ccdf4,Brazil:0xf2d326,
- France:0x183c96,Portugal:0xb50c32,India:0xff8b26
+let player,keeper,ball,aimRing;
+let phase="attack",busy=false,matchOver=false;
+let myGoals=0,opGoals=0,myCount=0,opCount=0,round=1;
+let aimX=0,aimY=1.3;
+let startBall=new THREE.Vector3(0,.23,6);
+let endBall=new THREE.Vector3();
+let shotStarted=0,shotDuration=850;
+let shotTarget="",selectedDive="";
+let diveLocked=false;
+let audioCtx=null,master=null,crowd=null,soundOn=false;
+let lastMessage="";
+
+const shirts={
+ "FC Barcelona":0xa50044,"Real Madrid":0xf5f5f5,
+ "Manchester City":0x5bbcff,"Liverpool":0xc8102e,
+ "Argentina":0x80d5ff,"Brazil":0xf2d22c,
+ "France":0x17408b,"Portugal":0xb30b31,"India":0xff8b25
 };
 
-function mat(color,roughness=.8,metalness=0){
- return new THREE.MeshStandardMaterial({color,roughness,metalness});
+function material(color,roughness=.8){
+ return new THREE.MeshStandardMaterial({color,roughness});
 }
-function box(parent,w,h,d,material,x,y,z){
- const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+function addBox(parent,w,h,d,mat,x,y,z){
+ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
  o.position.set(x,y,z);parent.add(o);return o;
 }
-function sphere(parent,r,material,x,y,z){
- const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),material);
+function addSphere(parent,r,mat,x,y,z){
+ const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),mat);
  o.position.set(x,y,z);parent.add(o);return o;
 }
-function cylinder(parent,r1,r2,h,material,x,y,z){
- const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,12),material);
- o.position.set(x,y,z);parent.add(o);return o;
-}
-function line(parent,a,b,color=0xffffff){
- const geo=new THREE.BufferGeometry().setFromPoints([
+function addLine(parent,a,b,color=0xffffff){
+ const g=new THREE.BufferGeometry().setFromPoints([
   new THREE.Vector3(...a),new THREE.Vector3(...b)
  ]);
- const l=new THREE.Line(geo,new THREE.LineBasicMaterial({color}));
- parent.add(l);return l;
+ parent.add(new THREE.Line(g,new THREE.LineBasicMaterial({color})));
 }
 
-function createPerson(x,y,z,shirtColor,isKeeper=false){
- const g=new THREE.Group();g.position.set(x,y,z);scene.add(g);
- const shirt=mat(shirtColor),shorts=mat(isKeeper?0x222222:0x171b24);
- const skin=mat(0xb97d54),socks=mat(isKeeper?0xf4d02b:0xececec);
- const boots=mat(0x171717,.4);
- const torso=cylinder(g,.25,.34,.8,shirt,0,1.45,0);
- torso.scale.x=1.05;
- cylinder(g,.105,.12,.18,skin,0,1.95,0);
- sphere(g,.19,skin,0,2.17,0);
- const hair=sphere(g,.192,mat(0x252019),0,2.26,-.025);
- hair.scale.set(1,.52,1);
- const arms=[],legs=[];
+function makePerson(x,z,color,isKeeper=false){
+ const root=new THREE.Group();
+ root.position.set(x,0,z);
+ scene.add(root);
+ const shirt=material(color),skin=material(0xb9825c);
+ const shorts=material(isKeeper?0x252525:0x20242a);
+ const socks=material(0xf0f0eb),boots=material(0x151515,.4);
+ addSphere(root,.18,skin,0,2.08,0);
+ const hair=addSphere(root,.185,material(0x30271e),0,2.16,-.025);
+ hair.scale.y=.45;
+ addBox(root,.48,.72,.27,shirt,0,1.5,0);
+ addBox(root,.43,.25,.28,shorts,0,1.02,0);
+ const legs=[],arms=[];
  for(const s of [-1,1]){
-  const arm=new THREE.Group();arm.position.set(s*.31,1.72,0);g.add(arm);
-  cylinder(arm,.075,.095,.48,shirt,0,-.19,0);
-  sphere(arm,.07,skin,0,-.44,0);arms.push(arm);
-  const leg=new THREE.Group();leg.position.set(s*.14,1.08,0);g.add(leg);
-  cylinder(leg,.095,.115,.53,shorts,0,-.12,0);
-  cylinder(leg,.065,.08,.46,socks,0,-.57,0);
-  box(leg,.12,.09,.25,boots,0,-.82,-.065);
+  const leg=new THREE.Group();leg.position.set(s*.13,.95,0);root.add(leg);
+  addBox(leg,.13,.48,.15,socks,0,-.23,0);
+  addBox(leg,.15,.11,.29,boots,0,-.49,-.06);
   legs.push(leg);
+  const arm=new THREE.Group();arm.position.set(s*.3,1.72,0);root.add(arm);
+  addBox(arm,.13,.48,.14,shirt,0,-.2,0);
+  addSphere(arm,.07,skin,0,-.46,0);arms.push(arm);
  }
- // Player origin is at ground level: feet touch the pitch.
- g.userData={arms,legs,shirt,torso,isKeeper,home:new THREE.Vector3(x,y,z)};
- return g;
+ root.userData={legs,arms,isKeeper};
+ return root;
 }
 
 function buildPitch(){
- const grass=mat(0x16763c);
- box(scene,45,.25,65,mat(0x15251c),0,-.22,-3);
- box(scene,40,.2,60,grass,0,-.1,-3);
- // Alternating mowing stripes
+ const dark=material(0x15251c),grass=material(0x197b3e);
+ addBox(scene,48,.3,68,dark,0,-.22,-3);
+ addBox(scene,40,.15,60,grass,0,-.09,-3);
  for(let i=0;i<10;i++){
-  box(scene,40,.012,3,mat(i%2?0x197d40:0x218748),0,.008,-29+i*6);
+  addBox(scene,40,.012,3,material(i%2?0x218647:0x197a3e),0,.0,-29+i*6);
  }
- const white=mat(0xf1f4e8);
- // Pitch boundary and penalty box
- const zFront=20,zBack=-26,xSide=18;
- line(scene,[-xSide,.025,zFront],[xSide,.025,zFront]);
- line(scene,[-xSide,.025,zBack],[xSide,.025,zBack]);
- line(scene,[-xSide,.025,zFront],[-xSide,.025,zBack]);
- line(scene,[xSide,.025,zFront],[xSide,.025,zBack]);
- line(scene,[-18,.026,-20],[18,.026,-20]);
- // Goal and penalty box
- line(scene,[-10,.028,-18],[-10,.028,-27]);
- line(scene,[10,.028,-18],[10,.028,-27]);
- line(scene,[-10,.028,-27],[10,.028,-27]);
- line(scene,[-6,.028,-11],[-6,.028,-18]);
- line(scene,[6,.028,-11],[6,.028,-18]);
- line(scene,[-6,.028,-18],[6,.028,-18]);
- // Center circle
- const circle=new THREE.Mesh(new THREE.RingGeometry(4.98,5.05,64),
-  new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));
- circle.rotation.x=-Math.PI/2;circle.position.set(0,.025,0);scene.add(circle);
- sphere(scene,.12,white,0,.03,0);
- // Goal posts and crossbar
- const post=mat(0xfafafa,.4);
- cylinder(scene,.095,.095,2.6,post,-3.7,1.3,-12.3);
- cylinder(scene,.095,.095,2.6,post,3.7,1.3,-12.3);
- box(scene,7.5,.13,.14,post,0,2.58,-12.3);
- // Net behind goal
- const netMat=new THREE.LineBasicMaterial({color:0xdce8e0,transparent:true,opacity:.5});
- for(let x=-3.5;x<=3.51;x+=.5){
-  line(scene,[x,.08,-12.35],[x,2.5,-14.4],0xdce8e0);
+ const white=0xf4f5eb;
+ addLine(scene,[-18,.02,20],[18,.02,20],white);
+ addLine(scene,[-18,.02,-27],[18,.02,-27],white);
+ addLine(scene,[-18,.02,20],[-18,.02,-27],white);
+ addLine(scene,[18,.02,20],[18,.02,-27],white);
+ addLine(scene,[-10,.025,-18],[-10,.025,-27],white);
+ addLine(scene,[10,.025,-18],[10,.025,-27],white);
+ addLine(scene,[-10,.025,-27],[10,.025,-27],white);
+ const circle=new THREE.Mesh(new THREE.RingGeometry(4.95,5.04,64),
+  new THREE.MeshBasicMaterial({color:white,side:THREE.DoubleSide}));
+ circle.rotation.x=-Math.PI/2;circle.position.set(0,.02,0);scene.add(circle);
+ const post=material(0xffffff,.35);
+ addBox(scene,.14,2.7,.14,post,-3.65,1.35,-12);
+ addBox(scene,.14,2.7,.14,post,3.65,1.35,-12);
+ addBox(scene,7.4,.14,.14,post,0,2.7,-12);
+ // Goal net lines
+ for(let x=-3.6;x<=3.61;x+=.45){
+  addLine(scene,[x,.05,-12.08],[x,2.65,-14.1],0xdce7e0);
  }
- for(let y=.25;y<=2.51;y+=.35){
-  line(scene,[-3.7,y,-12.35],[3.7,y,-12.35],0xdce8e0);
-  line(scene,[-3.7,y,-12.35],[-3.7,y,-14.4],0xdce8e0);
-  line(scene,[3.7,y,-12.35],[3.7,y,-14.4],0xdce8e0);
+ for(let y=.25;y<2.65;y+=.35){
+  addLine(scene,[-3.65,y,-12.08],[3.65,y,-12.08],0xdce7e0);
+  addLine(scene,[-3.65,y,-12.08],[-3.65,y,-14.1],0xdce7e0);
+  addLine(scene,[3.65,y,-12.08],[3.65,y,-14.1],0xdce7e0);
  }
- for(let z=-12.5;z>=-14.4;z-=.35){
-  line(scene,[-3.7,.08,z],[3.7,.08,z],0xdce8e0);
- }
- // Penalty spot
- sphere(scene,.075,white,0,.035,6.2);
+ addSphere(scene,.08,material(white),0,.04,6);
 }
 
 function buildStadium(){
- // Stadium bowl and stands
- const concrete=mat(0x39454b),seatA=mat(0x183c32),seatB=mat(0x284b42);
+ const concrete=material(0x35434a);
  for(const side of [-1,1]){
-  const stand=box(scene,8,7,58,concrete,side*23,3.2,-3);
-  stand.rotation.z=side*.05;
-  for(let row=0;row<10;row++){
-   const z=-30+row*5.8;
-   box(scene,7,.22,5.4,mat(row%2?0x445058:0x303d43),side*22.5,1.1+row*.56,z);
-   for(let col=0;col<12;col++){
-    const x=side*(19.5+col*.48);
-    const c=Math.random()>.5?seatA:seatB;
-    box(scene,.28,.35,.3,c,x,1.35+row*.56,z);
-   }
-  }
- }
- // End stands behind the goal and at the far end
- for(const z of [-32,25]){
-  box(scene,44,8,7,concrete,0,4,z);
+  addBox(scene,8,7,59,concrete,side*23,3,-3);
   for(let row=0;row<9;row++){
-   for(let col=0;col<44;col++){
-    const c=Math.random()>.5?seatA:seatB;
-    box(scene,.42,.35,.25,c,-21.5+col,1.1+row*.65,z);
+   addBox(scene,7,.2,5.8,material(row%2?0x394d4a:0x293b38),
+    side*22,1+row*.65,-29+row*6);
+   for(let col=0;col<10;col++){
+    const c=[0x164b36,0x1e5441,0x8b3535,0xddd1a1][Math.floor(Math.random()*4)];
+    addBox(scene,.25,.28,.26,material(c),side*(19.3+col*.57),
+     1.25+row*.65,-29+row*6);
    }
   }
  }
- // Roof beams and canopy
- const roof=mat(0x18272b,.6,.25);
+ for(const z of [-32,25]){
+  addBox(scene,43,8,7,concrete,0,4,z);
+  for(let row=0;row<7;row++){
+   for(let col=0;col<32;col++){
+    const c=Math.random()>.5?0x1b4a37:0x394e45;
+    addBox(scene,.42,.3,.24,material(c),-20+col*1.29,1+row*.8,z);
+   }
+  }
+ }
+ const roof=material(0x19282d,.6);
  for(const side of [-1,1]){
-  box(scene,10,.45,61,roof,side*23,10,-3);
-  for(let z=-31;z<27;z+=9){
-   cylinder(scene,.15,.15,10,roof,side*18,5,z);
-  }
+  addBox(scene,10,.4,62,roof,side*23,10,-3);
+  for(let z=-28;z<25;z+=12)addBox(scene,.22,10,.22,roof,side*18,5,z);
  }
- // Floodlights
- const lamp=mat(0xffffff,.25,.1);
+ scene.add(new THREE.HemisphereLight(0xe3f2ff,0x314c35,2));
+ const sun=new THREE.DirectionalLight(0xfff3d8,2.5);
+ sun.position.set(-12,28,14);scene.add(sun);
  for(const x of [-20,20]){
-  for(const z of [-23,15]){
-   box(scene,3,.35,.5,lamp,x,10.2,z);
-   const light=new THREE.PointLight(0xc8f3ff,65,38);
-   light.position.set(x,9.8,z);scene.add(light);
+  for(const z of [-24,15]){
+   const light=new THREE.PointLight(0xe2f4ff,55,38);
+   light.position.set(x,10,z);scene.add(light);
+   addBox(scene,3,.3,.5,material(0xffffff),x,10.2,z);
   }
  }
- // Stadium signs
- const signMat=mat(0x07552c);
- for(const x of [-12,0,12]){
-  box(scene,6,.7,.18,signMat,x,.45,-12.0);
- }
- // Sky and lighting
- scene.background=new THREE.Color(0x8eb7d0);
- scene.fog=new THREE.Fog(0x8eb7d0,55,115);
- scene.add(new THREE.HemisphereLight(0xcce7ff,0x29442d,2.1));
- const sun=new THREE.DirectionalLight(0xfff3d7,2.4);
- sun.position.set(-15,28,12);scene.add(sun);
+ scene.background=new THREE.Color(0x82b2d0);
+ scene.fog=new THREE.Fog(0x82b2d0,55,110);
 }
 
 function makeBall(){
  const g=new THREE.Group();
- const white=mat(0xf6f5ef,.38);
- const black=mat(0x171a1d,.5);
- sphere(g,.22,white,0,0,0);
- // Simple dark panels
+ addSphere(g,.22,material(0xffffff,.4),0,0,0);
  for(let i=0;i<5;i++){
   const a=i*Math.PI*2/5;
-  const p=sphere(g,.075,black,Math.cos(a)*.17,Math.sin(a)*.12,Math.sin(a)*.17);
-  p.scale.set(1,1,.5);
+  addSphere(g,.07,material(0x171717),Math.cos(a)*.16,Math.sin(a)*.12,Math.sin(a)*.16);
  }
  scene.add(g);return g;
 }
-
-function createTarget(){
- const ring=new THREE.Mesh(
-  new THREE.RingGeometry(.22,.29,32),
-  new THREE.MeshBasicMaterial({color:0x48ff82,side:THREE.DoubleSide})
- );
- ring.rotation.x=-Math.PI/2;ring.position.set(0,.04,-12.0);
- scene.add(ring);return ring;
+function makeAimRing(){
+ const r=new THREE.Mesh(new THREE.RingGeometry(.22,.3,32),
+  new THREE.MeshBasicMaterial({color:0x45ff7a,side:THREE.DoubleSide}));
+ r.rotation.x=-Math.PI/2;r.position.set(0,.04,-12);scene.add(r);return r;
 }
-
-function setMessage(text){$("message").textContent=text}
+function makeTeams(){
+ if(player)scene.remove(player);
+ if(keeper)scene.remove(keeper);
+ player=makePerson(0,7.4,shirts[$("myTeam").value]||0xa50044);
+ keeper=makePerson(0,-11.55,0xe8c52c,true);
+ resetBall();
+}
+function resetBall(){
+ ball.position.set(0,.23,6);
+ ball.rotation.set(0,0,0);
+ aimRing.position.set(aimX,.04,-12);
+}
+function setStatus(message,instruction=""){
+ $("status").textContent=message;
+ $("instruction").textContent=instruction;
+ lastMessage=message;
+}
+function speak(message){
+ if(!soundOn||!window.speechSynthesis)return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(message);
+ u.rate=1.03;u.volume=.9;speechSynthesis.speak(u);
+}
 function updateUI(){
- $("score").textContent=`${myScore} — ${opScore}`;
- $("myScore").textContent=myScore;
- $("opScore").textContent=opScore;
- $("myShots").textContent=myShots;
- $("opShots").textContent=opShots;
- const round=Math.min(5,Math.max(myShots,opShots));
- $("sub").textContent=matchOver?"MATCH FINISHED":
-  `PENALTY SHOOTOUT · ${round} / 5`;
- $("shoot").disabled=busy||matchOver;
+ $("score").textContent=`${myGoals} - ${opGoals}`;
+ $("myGoals").textContent=myGoals;$("opGoals").textContent=opGoals;
+ $("myCount").textContent=myCount;$("opCount").textContent=opCount;
+ $("round").textContent=matchOver?"MATCH FINISHED":
+  `PENALTY SHOOTOUT · ROUND ${Math.min(round,5)} / 5`;
+ $("attackControls").style.display=phase==="attack"&&!matchOver?"block":"none";
+ $("defendControls").style.display=phase==="defend"&&!matchOver?"block":"none";
+ $("shoot").disabled=busy||phase!=="attack"||matchOver;
+ document.querySelectorAll("[data-dive]").forEach(b=>{
+  b.disabled=busy||phase!=="defend"||matchOver||diveLocked;
+ });
 }
-function say(text){
- if(!audioEnabled||!("speechSynthesis" in window))return;
- try{
-  speechSynthesis.cancel();
-  const utter=new SpeechSynthesisUtterance(text);
-  utter.rate=1.03;utter.pitch=1.0;utter.volume=.9;
-  speechSynthesis.speak(utter);
- }catch(e){}
-}
-function commentaryForShot(goal){
- const lines=goal?
-  ["What a finish! The ball is in the back of the net!","GOAL! Brilliant penalty!","The goalkeeper had no chance!"]:
-  ["Saved by the goalkeeper!","Oh, what a save!","The penalty is denied!"];
- say(lines[Math.floor(Math.random()*lines.length)]);
-}
-
-function setupAudio(){
- if(audioEnabled)return;
+function soundSetup(){
+ if(soundOn)return;
  const AC=window.AudioContext||window.webkitAudioContext;
- if(!AC){setMessage("Audio is not supported in this browser.");return}
- audioContext=new AC();
- masterGain=audioContext.createGain();
- masterGain.gain.value=.55;
- masterGain.connect(audioContext.destination);
- crowdGain=audioContext.createGain();
- crowdGain.gain.value=.055;
- crowdGain.connect(masterGain);
- // Generated crowd ambience using filtered noise.
- const buffer=audioContext.createBuffer(1,audioContext.sampleRate*2,audioContext.sampleRate);
- const data=buffer.getChannelData(0);
- for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.7;
- crowdSource=audioContext.createBufferSource();
- crowdSource.buffer=buffer;crowdSource.loop=true;
- const filter=audioContext.createBiquadFilter();
- filter.type="bandpass";filter.frequency.value=480;filter.Q.value=.6;
- crowdSource.connect(filter);filter.connect(crowdGain);crowdSource.start();
- audioEnabled=true;
- $("audio").textContent="🔊 SOUND ON";
- musicLoop();
- setMessage("Stadium sound enabled!");
-}
-function musicLoop(){
- if(!audioEnabled||!audioContext)return;
- const notes=[130.81,164.81,196,246.94,196,164.81];
- let i=0;
- musicTimer=setInterval(()=>{
-  if(!audioEnabled||!audioContext)return;
-  const osc=audioContext.createOscillator();
-  const gain=audioContext.createGain();
-  osc.type="triangle";osc.frequency.value=notes[i%notes.length];
-  gain.gain.setValueAtTime(.0001,audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(.035,audioContext.currentTime+.05);
-  gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+.65);
-  osc.connect(gain);gain.connect(masterGain);
-  osc.start();osc.stop(audioContext.currentTime+.7);i++;
- },700);
+ if(!AC){setStatus("Audio is not supported.","");return}
+ audioCtx=new AC();
+ master=audioCtx.createGain();master.gain.value=.45;
+ master.connect(audioCtx.destination);
+ crowd=audioCtx.createGain();crowd.gain.value=.055;crowd.connect(master);
+ const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);
+ const d=buf.getChannelData(0);
+ for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*.65;
+ const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
+ const filter=audioCtx.createBiquadFilter();filter.type="bandpass";filter.frequency.value=450;
+ src.connect(filter);filter.connect(crowd);src.start();
+ soundOn=true;$("sound").textContent="🔊 SOUND ON";
+ setStatus("Stadium sound enabled!","Choose your target to shoot.");
 }
 function cheer(){
- if(!audioEnabled||!audioContext)return;
- const now=audioContext.currentTime;
- crowdGain.gain.cancelScheduledValues(now);
- crowdGain.gain.setValueAtTime(.055,now);
- crowdGain.gain.linearRampToValueAtTime(.22,now+.15);
- crowdGain.gain.linearRampToValueAtTime(.055,now+2.2);
+ if(!soundOn||!crowd)return;
+ const t=audioCtx.currentTime;
+ crowd.gain.cancelScheduledValues(t);
+ crowd.gain.setValueAtTime(.05,t);
+ crowd.gain.linearRampToValueAtTime(.22,t+.12);
+ crowd.gain.linearRampToValueAtTime(.055,t+2);
 }
-
-function animateKick(person){
- if(!person)return;
- person.userData.legs[0].rotation.x=-1.05;
- person.userData.legs[1].rotation.x=.35;
- person.userData.arms[0].rotation.z=-.55;
- person.userData.arms[1].rotation.z=.55;
-}
-function resetPerson(person){
- if(!person)return;
+function resetPose(person){
  for(const l of person.userData.legs)l.rotation.set(0,0,0);
  for(const a of person.userData.arms)a.rotation.set(0,0,0);
  person.rotation.set(0,0,0);
 }
+function kickPose(person){
+ person.userData.legs[0].rotation.x=-.9;
+ person.userData.legs[1].rotation.x=.3;
+ person.userData.arms[0].rotation.z=-.4;
+ person.userData.arms[1].rotation.z=.4;
+}
 
-function setTeams(){
- if(player)scene.remove(player);
- if(keeper)scene.remove(keeper);
- player=createPerson(0,0,7.5,teamColors[$("myTeam").value]||0xa50044,false);
- keeper=createPerson(0,0,-11.65,0xe4bd25,true);
- keeper.userData.home=keeperHome.clone();
- playerShirt=player.userData.shirt;
- resetBall();
+function chooseTarget(e){
+ if(phase!=="attack"||busy||matchOver)return;
+ const rect=renderer.domElement.getBoundingClientRect();
+ const nx=(e.clientX-rect.left)/rect.width;
+ const ny=(e.clientY-rect.top)/rect.height;
+ aimX=THREE.MathUtils.clamp((nx-.5)*8,-3.05,3.05);
+ aimY=THREE.MathUtils.clamp((1-ny)*3.0,.35,2.55);
+ aimRing.position.set(aimX,.045,-12);
+ setStatus("Target selected!","Press SHOOT to take your penalty.");
 }
-function resetBall(){
- ball.position.copy(ballStart);
- ball.rotation.set(0,0,0);
- if(targetMarker)targetMarker.position.set(aimX,.04,-12);
+
+function takeShot(){
+ if(phase!=="attack"||busy||matchOver)return;
+ soundSetup();
+ busy=true;
+ shotTarget="";
+ phase="attack";
+ shotStarted=performance.now();
+ shotDuration=1150-Number($("power").value)*4;
+ startBall.set(0,.23,6);ball.position.copy(startBall);
+ endBall.set(aimX,aimY,-12.5);
+ kickPose(player);
+ setStatus("You take the penalty!","Watch the shot...");
+ updateUI();
 }
-function newMatch(){
- myScore=opScore=myShots=opShots=0;
- busy=false;matchOver=false;
- setTeams();updateUI();
- setMessage("Choose your target and take the shot!");
- $("shoot").disabled=false;
+function playerShotFinished(){
+ const inGoal=Math.abs(endBall.x)<3.4&&endBall.y<2.55&&endBall.y>.12;
+ const keeperSave=inGoal&&Math.abs(endBall.x-keeper.position.x)<.65&&Math.random()<.72;
+ const goal=inGoal&&!keeperSave;
+ if(goal){myGoals++;setStatus("GOAL! Brilliant finish!","Now prepare to defend the opponent's penalty.");cheer();}
+ else if(keeperSave){setStatus("SAVED BY THE GOALKEEPER!","Next, you will defend the opponent's penalty.");}
+ else{setStatus("MISSED!","Next, you will defend the opponent's penalty.");}
+ myCount++;resetPose(player);resetPose(keeper);updateUI();
+ setTimeout(()=>startOpponentShot(),1200);
+}
+
+const zones={
+ "high-left":new THREE.Vector3(-2.5,2.25,-12.5),
+ "high-center":new THREE.Vector3(0,2.35,-12.5),
+ "high-right":new THREE.Vector3(2.5,2.25,-12.5),
+ "low-left":new THREE.Vector3(-2.5,.42,-12.5),
+ "low-center":new THREE.Vector3(0,.42,-12.5),
+ "low-right":new THREE.Vector3(2.5,.42,-12.5)
+};
+function startOpponentShot(){
+ if(matchOver)return;
+ phase="defend";busy=true;diveLocked=false;selectedDive="";
+ shotTarget=Object.keys(zones)[Math.floor(Math.random()*6)];
+ startBall.set(0,.23,6);ball.position.copy(startBall);
+ endBall.copy(zones[shotTarget]);
+ shotStarted=performance.now();shotDuration=1150;
+ kickPose(player);
+ setStatus("OPPONENT IS SHOOTING!","Choose a dive direction now!");
+ updateUI();
+ speak("The opponent takes the penalty. Choose your dive!");
+}
+function chooseDive(e){
+ if(phase!=="defend"||!busy||diveLocked||matchOver)return;
+ selectedDive=e.currentTarget.dataset.dive;
+ diveLocked=true;
+ // Animate keeper toward the selected side and height.
+ const d=selectedDive;
+ const left=d.endsWith("left"),right=d.endsWith("right");
+ keeper.userData.diveX=left?-2.35:right?2.35:0;
+ keeper.userData.diveY=d.startsWith("high")?1.15:d.startsWith("low")?.15:.55;
+ keeper.userData.diveTime=performance.now();
+ keeper.userData.diveStartX=keeper.position.x;
+ keeper.userData.diveStartY=keeper.position.y;
+ setStatus("You dive "+d.toUpperCase()+"!","Wait for the save result...");
+ updateUI();
+}
+function opponentShotFinished(){
+ const correct=selectedDive===shotTarget;
+ const saved=correct&&diveLocked;
+ if(saved){
+  setStatus("WHAT A SAVE! 🧤","You read the shot perfectly!");
+  cheer();
+ }else{
+  opGoals++;
+  setStatus("GOAL! The opponent scores.","Choose your next penalty target.");
+ }
+ opCount++;
+ resetPose(player);resetPose(keeper);
+ updateUI();
+ setTimeout(()=>{
+  if(myCount>=5&&opCount>=5&&myGoals!==opGoals){finishMatch();return}
+  if(myCount>=5&&opCount>=5&&myGoals===opGoals){
+   round=6;
+   setStatus("SUDDEN DEATH!","One kick each. You still control every save.");
+  }else{
+   round=Math.min(5,Math.max(myCount,opCount)+1);
+   setStatus("Your turn to shoot!","Click the goal to aim, then press SHOOT.");
+  }
+  phase="attack";busy=false;diveLocked=false;resetBall();updateUI();
+ },1300);
 }
 function finishMatch(){
- matchOver=true;busy=false;updateUI();
- let msg=myScore>opScore?"YOU WIN! 🏆":myScore<opScore?"OPPONENT WINS":"IT'S A DRAW!";
- setMessage(msg);
- say(msg);
- if(myScore>opScore)cheer();
+ matchOver=true;busy=false;phase="over";
+ const result=myGoals>opGoals?"YOU WIN THE MATCH! 🏆":
+  myGoals<opGoals?"OPPONENT WINS!":"MATCH DRAW!";
+ setStatus(result,"Press NEW MATCH to play again.");
+ speak(result);updateUI();
+}
+function newMatch(){
+ myGoals=opGoals=myCount=opCount=0;
+ round=1;phase="attack";busy=false;matchOver=false;
+ diveLocked=false;selectedDive="";
+ makeTeams();resetPose(player);resetPose(keeper);
+ setStatus("Choose a target and take your penalty!","Click the goal to aim.");
+ updateUI();
 }
 
-function chooseAim(event){
- if(busy||matchOver)return;
- const rect=renderer.domElement.getBoundingClientRect();
- const nx=(event.clientX-rect.left)/rect.width;
- const ny=(event.clientY-rect.top)/rect.height;
- aimX=THREE.MathUtils.clamp((nx-.5)*8,-3.05,3.05);
- aimY=THREE.MathUtils.clamp((1-ny)*3.1,.45,2.65);
- targetMarker.position.set(aimX,.045,-12.1);
- setMessage("Target selected. Press SHOOT!");
-}
-function shoot(){
- if(busy||matchOver)return;
- setupAudio();
- busy=true;
- $("shoot").disabled=true;
- shotKind="player";
- shotStart=performance.now();
- shotDuration=1150-(Number($("power").value)*4.7);
- ballStart.set(0,.22,6.2);
- ball.position.copy(ballStart);
- ballEnd.set(aimX,aimY,-12.4);
- animateKick(player);
- keeper.userData.legs[0].rotation.x=-.2;
- keeper.userData.legs[1].rotation.x=.2;
- const diveX=aimX+(Math.random()-.5)*1.8;
- keeper.userData.diveX=THREE.MathUtils.clamp(diveX,-3.1,3.1);
- keeper.userData.diveStart=performance.now();
- setMessage("Here comes the shot...");
- say("The player steps up. Here comes the penalty!");
-}
-function finishPlayerShot(){
- const x=ballEnd.x,y=ballEnd.y;
- const inGoal=Math.abs(x)<3.45&&y<2.45&&y>.12;
- const keeperDistance=Math.abs(x-keeper.position.x);
- const saved=inGoal&&keeperDistance<.85&&Math.random()<.72;
- const goal=inGoal&&!saved;
- if(goal){myScore++;setMessage("GOAL! What a finish! ⚽");cheer();}
- else if(saved){setMessage("SAVED! Great goalkeeping!");}
- else{setMessage("MISSED! Try the next one!");}
- myShots++;
- commentaryForShot(goal);
- updateUI();
- resetPerson(player);resetPerson(keeper);
- if(myShots>=5&&opShots>=5){
-  if(myScore!==opScore){setTimeout(finishMatch,1200);return}
-  $("sub").textContent="SUDDEN DEATH";
- }
- setTimeout(opponentKick,1300);
-}
-function opponentKick(){
- if(matchOver)return;
- shotKind="opponent";busy=true;
- ball.position.copy(ballStart);
- ballStart.set(0,.22,6.2);
- const x=(Math.random()*5.6)-2.8;
- const y=.6+Math.random()*1.8;
- ballEnd.set(x,y,-12.4);
- shotStart=performance.now();shotDuration=850;
- const saved=Math.random()<.31;
- keeper.userData.opponentSave=saved;
- if(saved){
-  keeper.userData.diveX=x;
-  keeper.userData.diveStart=performance.now();
- }
- setMessage("Opponent takes the penalty...");
- say("The opponent approaches the ball.");
-}
-function finishOpponentShot(){
- const x=ballEnd.x,y=ballEnd.y;
- const inGoal=Math.abs(x)<3.45&&y<2.45&&y>.12;
- const saved=inGoal&&Math.abs(x)<1.5&&Math.random()<.25;
- const goal=inGoal&&!saved;
- if(goal){opScore++;setMessage("Opponent scores!");}
- else if(saved){setMessage("SAVE! The goalkeeper keeps it out!");}
- else{setMessage("Opponent misses!");}
- opShots++;
- commentaryForShot(!goal);
- if(goal)cheer();
- resetPerson(keeper);resetPerson(player);
- updateUI();
- if(myShots>=5&&opShots>=5&&myScore!==opScore){setTimeout(finishMatch,1200);return}
- if(myShots>=5&&opShots>=5&&myScore===opScore){
-  $("sub").textContent="SUDDEN DEATH";
-  setMessage("Sudden death! One kick each.");
- }
- busy=false;resetBall();updateUI();
-}
 function animate(){
  requestAnimationFrame(animate);
- const now=performance.now();
- const dt=clock.getDelta();
- // Subtle idle motion
- if(player&&!busy)player.position.y=.015+Math.sin(now*.003)*.012;
- if(keeper&&!busy){
-  keeper.position.x+=(0-keeper.position.x)*Math.min(1,dt*2);
-  keeper.rotation.z+=(0-keeper.rotation.z)*Math.min(1,dt*2);
- }
- if(busy&&shotStart){
-  const t=THREE.MathUtils.clamp((now-shotStart)/shotDuration,0,1);
-  const eased=t*t*(3-2*t);
-  ball.position.lerpVectors(ballStart,ballEnd,eased);
-  ball.position.y+=Math.sin(t*Math.PI)*1.25;
-  ball.rotation.x+=dt*7;ball.rotation.z+=dt*4;
-  if(shotKind==="player"&&keeper.userData.diveStart){
-   const k=THREE.MathUtils.clamp((now-keeper.userData.diveStart)/400,0,1);
-   keeper.position.x=THREE.MathUtils.lerp(0,keeper.userData.diveX,k);
-   keeper.rotation.z=THREE.MathUtils.lerp(0,keeper.userData.diveX>0?-.85:.85,k);
+ const now=performance.now(),dt=clock.getDelta();
+ if(player&&!busy)player.position.y=.01+Math.sin(now*.003)*.01;
+ if(busy&&shotStarted){
+  const t=THREE.MathUtils.clamp((now-shotStarted)/shotDuration,0,1);
+  const ease=t*t*(3-2*t);
+  ball.position.lerpVectors(startBall,endBall,ease);
+  ball.position.y+=Math.sin(t*Math.PI)*.8;
+  ball.rotation.x+=dt*8;ball.rotation.z+=dt*5;
+  // The goalkeeper responds to the player's dive input.
+  if(phase==="defend"&&diveLocked&&keeper.userData.diveTime){
+   const k=THREE.MathUtils.clamp((now-keeper.userData.diveTime)/280,0,1);
+   keeper.position.x=THREE.MathUtils.lerp(keeper.userData.diveStartX,keeper.userData.diveX,k);
+   keeper.position.y=THREE.MathUtils.lerp(keeper.userData.diveStartY,keeper.userData.diveY,k);
+   keeper.rotation.z=THREE.MathUtils.lerp(0,keeper.userData.diveX>0?-.9:.9,k);
   }
   if(t>=1){
-   shotStart=0;
-   if(shotKind==="player")finishPlayerShot();
-   else finishOpponentShot();
+   shotStarted=0;
+   if(phase==="attack")playerShotFinished();
+   else if(phase==="defend")opponentShotFinished();
   }
  }
  renderer.render(scene,camera);
 }
 function resize(){
- const w=game.clientWidth,h=game.clientHeight;
- camera.aspect=w/h;camera.updateProjectionMatrix();
- renderer.setSize(w,h);
+ if(!renderer||!camera)return;
+ const w=host.clientWidth,h=host.clientHeight;
+ camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);
 }
 function init(){
  scene=new THREE.Scene();
- scene.background=new THREE.Color(0x8eb7d0);
- camera=new THREE.PerspectiveCamera(53,innerWidth/innerHeight,.1,200);
- camera.position.set(0,8.5,24);
- camera.lookAt(0,2,-4);
- renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+ camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,200);
+ camera.position.set(0,8.5,24);camera.lookAt(0,2,-4);
+ renderer=new THREE.WebGLRenderer({antialias:true});
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
  renderer.shadowMap.enabled=true;
- renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  renderer.outputColorSpace=THREE.SRGBColorSpace;
  renderer.toneMapping=THREE.ACESFilmicToneMapping;
- renderer.toneMappingExposure=1.1;
- game.appendChild(renderer.domElement);
+ host.appendChild(renderer.domElement);
  clock=new THREE.Clock();
  buildStadium();buildPitch();
- ball=makeBall();
- targetMarker=createTarget();
- setTeams();updateUI();
- renderer.domElement.addEventListener("pointerdown",chooseAim);
- $("shoot").addEventListener("click",shoot);
- $("audio").addEventListener("click",setupAudio);
- $("new").addEventListener("click",newMatch);
+ ball=makeBall();aimRing=makeAimRing();
+ makeTeams();updateUI();
+ renderer.domElement.addEventListener("pointerdown",chooseTarget);
+ $("shoot").addEventListener("click",takeShot);
+ $("sound").addEventListener("click",soundSetup);
+ $("newMatch").addEventListener("click",newMatch);
  $("myTeam").addEventListener("change",()=>{if(!busy)newMatch()});
  $("opTeam").addEventListener("change",()=>{if(!busy)newMatch()});
+ document.querySelectorAll("[data-dive]").forEach(b=>b.addEventListener("click",chooseDive));
  addEventListener("resize",resize);
- resize();
- $("loading").style.display="none";
- animate();
+ resize();animate();
 }
-try{init()}catch(err){
- console.error(err);
- $("loading").style.display="grid";
- $("loading").innerHTML="<div><h2>Unable to load 3D game</h2><p>Check your internet connection and browser WebGL support.</p><p>"+String(err.message)+"</p></div>";
+try{init()}catch(e){
+ console.error(e);
+ $("status").textContent="Could not load the 3D game. Check your internet connection.";
+ $("instruction").textContent="Reload the page and try again.";
 }
 </script>
 </body>
