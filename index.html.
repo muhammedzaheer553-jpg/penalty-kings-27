@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penalty Kings 27 | Pro eFootball Edition</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#050f0c;color:white;font-family:'Segoe UI',Arial,sans-serif;overflow-x:hidden}
+header{text-align:center;padding:15px;background:linear-gradient(135deg,#0a241b,#06140f);border-bottom:2px solid #204c35;box-shadow:0 4px 20px rgba(0,0,0,0.6)}
+h1{color:#ffe600;margin:0;font-size:clamp(24px,5vw,40px);letter-spacing:3px;text-shadow:0 0 15px rgba(255,230,0,0.4)}
+header p{color:#a2c9b4;font-size:11px;letter-spacing:3px;margin-top:5px}
+main{max-width:1150px;margin:auto;padding:12px}
+.panel{background:linear-gradient(145deg,#0d2218,#091811);border:1px solid #2a523e;border-radius:16px;padding:15px;margin-bottom:14px;box-shadow:0 8px 25px rgba(0,0,0,0.4)}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;color:#a2c9b4;font-size:11px;font-weight:bold;letter-spacing:1px;margin-bottom:6px}
+select{width:100%;padding:12px;background:#133323;color:white;border:1px solid #437059;border-radius:10px;font-size:14px;outline:none;cursor:pointer}
+select:focus{border-color:#ffe600}
+.scoreboard{display:grid;grid-template-columns:1fr auto 1fr;text-align:center;align-items:center;gap:10px}
+.teamname{font-weight:bold;font-size:14px;color:#d4ede0;overflow-wrap:anywhere}
+.score{font-size:48px;color:#ffe600;font-weight:900;text-shadow:0 0 12px rgba(255,230,0,0.3)}
+.vs{font-size:13px;color:#7a9e8b;font-weight:bold}
+#phase{text-align:center;color:#ffe600;font-weight:bold;font-size:12px;margin-top:10px;letter-spacing:1px}
+#gamebox{position:relative;background:#030a07;border-radius:14px;overflow:hidden;border:2px solid #28543f;box-shadow:inset 0 0 30px rgba(0,0,0,0.8)}
+#game{width:100%;height:clamp(320px,60vw,580px);display:block;touch-action:manipulation}
+#loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#06140f;color:#ffe600;text-align:center;padding:20px;pointer-events:none;font-weight:bold;gap:10px}
+.spinner{width:40px;height:40px;border:4px solid rgba(255,230,0,0.2);border-top-color:#ffe600;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hint{text-align:center;font-size:12px;color:#a2c9b4;padding-top:10px}
+.player{display:flex;align-items:center;gap:14px}
+.shirt{font-size:32px;background:#193d2c;padding:12px;border-radius:12px;border:1px solid #36664e}
+.playername{font-size:18px;font-weight:bold;color:white}
+.small{font-size:12px;color:#9bc4b0;margin-top:4px}
+.power{display:flex;align-items:center;gap:14px;margin:16px 0}
+.power label{margin:0}
+.power input{flex:1;accent-color:#ffe600;height:6px;cursor:pointer}
+button{border:0;border-radius:10px;padding:14px;font-weight:bold;cursor:pointer;transition:all 0.2s ease}
+button:hover{transform:translateY(-1px);filter:brightness(1.1)}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.45;transform:none;filter:none;cursor:not-allowed}
+.primary{background:linear-gradient(135deg,#ffe600,#e6cb00);color:#0d1a14;box-shadow:0 4px 15px rgba(255,230,0,0.3)}
+.secondary{background:#234a37;color:white;border:1px solid #3b6e54}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#message{text-align:center;min-height:45px;padding-top:14px;font-weight:bold;font-size:15px;color:#ffe600;text-shadow:0 0 10px rgba(255,230,0,0.2)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.stat{background:#133323;border-radius:10px;padding:14px 6px;border:1px solid #28543f}
+.stat strong{display:block;color:#ffe600;font-size:25px}
+.stat small{font-size:10px;color:#a2c9b4;letter-spacing:1px}
+#players{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid #36664e;background:#133323;border-radius:20px;padding:8px 12px;font-size:11px;color:#b2d4c2}
+.chip.done{opacity:.4;text-decoration:line-through}
+.chip.active{background:#ffe600;color:#0d1a14;border-color:#ffe600;font-weight:bold;box-shadow:0 0 10px rgba(255,230,0,0.4)}
+.rules{font-size:12px;line-height:1.7;color:#b2d4c2;margin-top:10px}
+footer{text-align:center;color:#6b8c7b;font-size:11px;padding:25px;letter-spacing:1px}
+@media(max-width:480px){main{padding:6px}.panel{padding:12px}.score{font-size:40px}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚽ PENALTY KINGS 27</h1>
+  <p>ULTIMATE eFOOTBALL 3D STADIUM EXPERIENCE</p>
+</header>
+
+<main>
+<section class="panel">
+  <div class="teams">
+    <div>
+      <label for="myTeam">YOUR TEAM</label>
+      <select id="myTeam">
+        <option>FC Barcelona</option><option>Real Madrid</option>
+        <option>Manchester City</option><option>Liverpool</option>
+        <option>Paris Saint-Germain</option><option>Argentina</option>
+        <option>Brazil</option><option>France</option><option>Portugal</option><option>India</option>
+      </select>
+    </div>
+    <div>
+      <label for="opTeam">OPPONENT</label>
+      <select id="opTeam">
+        <option>Real Madrid</option><option>FC Barcelona</option>
+        <option>Manchester City</option><option>Liverpool</option>
+        <option>Paris Saint-Germain</option><option>Argentina</option>
+        <option>Brazil</option><option>France</option><option>Portugal</option><option>India</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="scoreboard">
+    <div><div class="teamname" id="myName">FC Barcelona</div><div class="score" id="myScore">0</div></div>
+    <div class="vs">VS</div>
+    <div><div class="teamname" id="opName">Real Madrid</div><div class="score" id="opScore">0</div></div>
+  </div>
+  <div id="phase">3D STADIUM · KICK 1 OF 10</div>
+</section>
+
+<section class="panel">
+  <div id="gamebox">
+    <canvas id="game"></canvas>
+    <div id="loading">
+      <div class="spinner"></div>
+      <div>Loading eFootball 3D Stadium & Lighting...</div>
+    </div>
+  </div>
+  <div class="hint">🎯 Goal-ന്റെ ഭാഗത്ത് click ചെയ്ത് aim തിരഞ്ഞെടുക്കുക. പിന്നെ TAKE PENALTY അമർത്തുക.</div>
+</section>
+
+<section class="panel">
+  <div class="player">
+    <div class="shirt">👕</div>
+    <div style="flex:1;min-width:0">
+      <div class="playername" id="playerName">Player 1</div>
+      <div class="small" id="playerTeam">Your penalty taker</div>
+    </div>
+    <strong id="kickNo" style="color:#ffe600;font-size:12px">KICK 1</strong>
+  </div>
+  <div class="power">
+    <label for="power">POWER</label>
+    <input id="power" type="range" min="30" max="100" value="75">
+    <strong id="powerValue">75%</strong>
+  </div>
+  <div class="actions">
+    <button class="primary" id="kickBtn">⚽ TAKE PENALTY</button>
+    <button class="secondary" id="resetBtn">↻ NEW MATCH</button>
+  </div>
+  <div id="message">Choose your target and take the shot!</div>
+</section>
+
+<section class="panel">
+  <h3>📊 Match Statistics</h3>
+  <div class="stats">
+    <div class="stat"><strong id="myGoals">0</strong><small>YOUR GOALS</small></div>
+    <div class="stat"><strong id="opGoals">0</strong><small>OPPONENT GOALS</small></div>
+    <div class="stat"><strong id="saves">0</strong><small>SAVES</small></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h3>👥 Your Penalty Takers</h3>
+  <div id="players"></div>
+  <p class="rules">ഓരോ kick-നും അടുത്ത player സ്വയം വരും. ആദ്യ 10 kicks-ൽ 10 വ്യത്യസ്ത players. 10 kicks കഴിഞ്ഞും സമനിലയാണെങ്കിൽ Sudden Death. Sudden Death-ൽ ഓരോ ടീമും ഒരു kick വീതം എടുത്തശേഷം score വ്യത്യാസമുണ്ടെങ്കിൽ match തീരും.</p>
+</section>
+</main>
+<footer>Penalty Kings 27 · eFootball Pro Edition</footer>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+
+const $ = id => document.getElementById(id);
+
+const rosters = {
+ "FC Barcelona":["Robert Lewandowski","Lamine Yamal","Raphinha","Pedri","Gavi","Frenkie de Jong","Ferran Torres","Dani Olmo","Ronald Araújo","Jules Koundé"],
+ "Real Madrid":["Kylian Mbappé","Vinícius Júnior","Jude Bellingham","Rodrygo","Federico Valverde","Arda Güler","Eduardo Camavinga","Aurélien Tchouaméni","Antonio Rüdiger","Éder Militão"],
+ "Manchester City":["Erling Haaland","Phil Foden","Kevin De Bruyne","Bernardo Silva","Jérémy Doku","Omar Marmoush","Rayan Cherki","Rodri","Mateo Kovačić","Rúben Dias"],
+ "Liverpool":["Mohamed Salah","Virgil van Dijk","Alexis Mac Allister","Dominik Szoboszlai","Cody Gakpo","Luis Díaz","Darwin Núñez","Ryan Gravenberch","Diogo Jota","Ibrahima Konaté"],
+ "Paris Saint-Germain":["Ousmane Dembélé","Désiré Doué","Khvicha Kvaratskhelia","Bradley Barcola","Achraf Hakimi","Vitinha","João Neves","Fabián Ruiz","Warren Zaïre-Emery","Marquinhos"],
+ "Argentina":["Lionel Messi","Julián Álvarez","Lautaro Martínez","Ángel Di María","Alexis Mac Allister","Enzo Fernández","Rodrigo De Paul","Nicolás González","Nicolás Otamendi","Cristian Romero"],
+ "Brazil":["Neymar","Vinícius Júnior","Raphinha","Rodrygo","Endrick","Bruno Guimarães","Casemiro","Lucas Paquetá","Marquinhos","Éder Militão"],
+ "France":["Kylian Mbappé","Ousmane Dembélé","Michael Olise","Olivier Giroud","Antoine Griezmann","Aurélien Tchouaméni","Eduardo Camavinga","Adrien Rabiot","William Saliba","Jules Koundé"],
+ "Portugal":["Cristiano Ronaldo","Bruno Fernandes","Bernardo Silva","Rafael Leão","Diogo Jota","João Félix","Vitinha","João Neves","Rúben Dias","Nuno Mendes"],
+ "India":["Sunil Chhetri","Gurpreet Singh Sandhu","Brandon Fernandes","Lallianzuala Chhangte","Sahal Abdul Samad","Liston Colaco","Anwar Ali","Sandesh Jhingan","Rahul Bheke","Apuia"]
+};
+
+const colors = {
+ "FC Barcelona":0xa50044,"Real Madrid":0xf0f0f0,
+ "Manchester City":0x6cabdd,"Liverpool":0xc8102e,
+ "Paris Saint-Germain":0x004170,"Argentina":0x75bce8,
+ "Brazil":0xe5d000,"France":0x2045a0,
+ "Portugal":0xd32332,"India":0xff8c27
+};
+
+let myScore=0,opScore=0,saves=0,myKicks=0,opKicks=0;
+let suddenDeath=false,finished=false,busy=false;
+let aim={x:0,y:1.5};
+let ball,keeper,player,aimMarker;
+let ballStart,ballEnd,shotStart,shotDuration;
+let shotResult=null;
+let scene,camera,renderer,clock;
+let animationError=false;
+
+const canvas=$("game");
+const loading=$("loading");
+
+function makeMaterial(color,roughness=0.7,metalness=0.1){
+ return new THREE.MeshStandardMaterial({color,roughness,metalness});
+}
+
+function box(parent,w,h,d,material,x,y,z){
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
+
+function sphere(parent,r,material,x,y,z){
+ const mesh=new THREE.Mesh(new THREE.SphereGeometry(r,24,20),material);
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
+
+function cylinder(parent,r1,r2,h,material,x,y,z){
+ const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,20),material);
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
+
+function createProPlayer(x,y,z,shirtColor,isKeeper=false){
+ const group=new THREE.Group();
+ group.position.set(x,y,z);
+ scene.add(group);
+
+ const skin=makeMaterial(0xc9956d,0.8);
+ const shirt=makeMaterial(shirtColor,0.6);
+ const shorts=makeMaterial(isKeeper?0x1a2e75:0x111c18,0.7);
+ const socks=makeMaterial(0xf4f4f0,0.9);
+ const boots=makeMaterial(0x111111,0.4,0.5);
+
+ // Head & Face structure
+ sphere(group,0.16,skin,0,1.86,0);
+ // Hair
+ const hairMat=makeMaterial(0x221105,0.9);
+ sphere(group,0.15,hairMat,0,1.93,-0.02);
+
+ // Torso (realistic kit curves)
+ cylinder(group,0.18,0.24,0.6,shirt,0,1.42,0);
+ // Shorts
+ cylinder(group,0.20,0.21,0.28,shorts,0,0.98,0);
+
+ // Limbs
+ for(const side of [-1,1]){
+  const leg=cylinder(group,0.065,0.09,0.58,socks,side*0.11,0.64,0);
+  leg.rotation.z=side*0.04;
+  box(group,0.12,0.08,0.26,boots,side*0.11,0.32,-0.05);
+
+  const arm=cylinder(group,0.055,0.075,0.54,shirt,side*0.28,1.46,0);
+  arm.rotation.z=side*0.25;
+  sphere(group,0.068,skin,side*0.34,1.18,0);
+ }
+ return group;
+}
+
+function makeStadium(){
+ scene=new THREE.Scene();
+ scene.background=new THREE.Color(0x0a1622);
+ scene.fog=new THREE.FogExp2(0x0a1622,0.018);
+
+ camera=new THREE.PerspectiveCamera(45,1,0.1,120);
+ camera.position.set(0,4.2,12.0);
+ camera.lookAt(0,1.5,-8);
+
+ renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+ renderer.shadowMap.enabled=true;
+ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ renderer.outputColorSpace=THREE.SRGBColorSpace;
+
+ // Advanced eFootball Lighting setup (Floodlights & Stadium Glow)
+ scene.add(new THREE.AmbientLight(0xcce6ff,1.4));
+
+ const mainLight=new THREE.DirectionalLight(0xfffaea,2.8);
+ mainLight.position.set(-8,22,12);
+ mainLight.castShadow=true;
+ mainLight.shadow.mapSize.width=2048;
+ mainLight.shadow.mapSize.height=2048;
+ mainLight.shadow.camera.near=0.5;
+ mainLight.shadow.camera.far=60;
+ mainLight.shadow.camera.left=-18;
+ mainLight.shadow.camera.right=18;
+ mainLight.shadow.camera.top=18;
+ mainLight.shadow.camera.bottom=-18;
+ scene.add(mainLight);
+
+ // Colorful stadium accent lights (Blue/Teal vibes like modern arenas)
+ const floodLight1=new THREE.PointLight(0x00bfff,3,40);
+ floodLight1.position.set(-15,16,-10);
+ scene.add(floodLight1);
+
+ const floodLight2=new THREE.PointLight(0xffaa00,2.5,40);
+ floodLight2.position.set(15,16,-10);
+ scene.add(floodLight2);
+
+ // Lush HD-style striped grass pitch
+ const pitchMat=makeMaterial(0x13612d,0.85);
+ box(scene,40,0.1,55,pitchMat,0,-0.06,-8);
+
+ for(let i=0;i<14;i++){
+  const stripeMat=makeMaterial(i%2?0x176e33:0x105525,0.85);
+  box(scene,40,0.01,3.2,stripeMat,0,0,-31+i*3.5);
+ }
+
+ // Pitch white markings
+ const lineMat=new THREE.LineBasicMaterial({color:0xffffff,linewidth:2});
+ function drawLine(points){
+  const geo=new THREE.BufferGeometry().setFromPoints(points.map(p=>new THREE.Vector3(...p)));
+  scene.add(new THREE.Line(geo,lineMat));
+ }
+ drawLine([[-9.16,0.02,-12],[9.16,0.02,-12],[9.16,0.02,-4.5],[-9.16,0.02,-4.5],[-9.16,0.02,-12]]);
+ drawLine([[-3.66,0.02,-12],[3.66,0.02,-12],[3.66,0.02,-7.5],[-3.66,0.02,-7.5],[-3.66,0.02,-12]]);
+ drawLine([[0,0.02,1.5],[0,0.02,2.5]]); // penalty spot marker
+
+ // Multi-tiered Realistic Stadium Stands & Crowd Seats
+ for(const side of [-1,1]){
+  const standMat=makeMaterial(0x1f2e38,0.7);
+  box(scene,10,6,42,standMat,side*20,3,-8);
+
+  // Colorful spectator blocks
+  for(let row=0;row<6;row++){
+   for(let i=0;i<45;i++){
+    const seatColors=[0xff3333,0x3366ff,0xffffff,0xffcc00,0x33cc66];
+    const spectator=sphere(scene,0.08,makeMaterial(seatColors[(i+row)%seatColors.length],0.9),side*(15+row*0.75),1.8+row*0.6,-26+i*0.85);
+    spectator.scale.set(1,1.4,1);
+   }
+  }
+ }
+
+ // Goal Frame & High-Definition Netting
+ const postMat=makeMaterial(0xfcfcfc,0.3,0.8);
+ const postR=0.07;
+ cylinder(scene,postR,postR,2.44,postMat,-3.66,1.22,-12);
+ cylinder(scene,postR,postR,2.44,postMat,3.66,1.22,-12);
+ const crossbar=cylinder(scene,postR,postR,7.32,postMat,0,2.44,-12);
+ crossbar.rotation.z=Math.PI/2;
+
+ // Net structure
+ const netMat=new THREE.MeshStandardMaterial({color:0xe6f0eb,transparent:true,opacity:0.22,side:THREE.DoubleSide,wireframe:false});
+ box(scene,7.32,2.44,0.08,netMat,0,1.22,-12.8);
+ for(let x=-3.66;x<=3.66;x+=0.45){
+  drawLine([[x,0.02,-12],[x,2.44,-12]]);
+ }
+ for(let y=0.3;y<=2.44;y+=0.35){
+  drawLine([[-3.66,y,-12],[3.66,y,-12]]);
+ }
+
+ // Ball, Goalkeeper and Taker Setup
+ const ballMat=makeMaterial(0xffffff,0.3,0.2);
+ ball=sphere(scene,0.22,ballMat,0,0.22,2);
+ ballStart=new THREE.Vector3(0,0.22,2);
+
+ keeper=createProPlayer(0,0,-11.6,0x2255cc,true);
+ player=createProPlayer(0,0,4.3,colors[$("myTeam").value]||0xa50044,false);
+
+ // Target Aim Ring
+ const ringGeo=new THREE.TorusGeometry(0.24,0.035,10,32);
+ const ringMat=new THREE.MeshBasicMaterial({color:0xffe600});
+ aimMarker=new THREE.Mesh(ringGeo,ringMat);
+ aimMarker.position.set(aim.x,aim.y,-11.85);
+ scene.add(aimMarker);
+
+ resize();
+ window.addEventListener("resize",resize);
+ clock=new THREE.Clock();
+ animate();
+}
+
+function resize(){
+ if(!renderer||!camera)return;
+ const w=canvas.clientWidth||720;
+ const h=canvas.clientHeight||420;
+ renderer.setSize(w,h,false);
+ camera.aspect=w/h;
+ camera.updateProjectionMatrix();
+}
+
+function animate(){
+ requestAnimationFrame(animate);
+ if(!renderer)return;
+ const dt=Math.min(clock.getDelta(),0.04);
+
+ if(busy&&shotStart!==undefined&&shotStart!==null){
+  const elapsed=(performance.now()-shotStart)/shotDuration;
+  const t=Math.min(1,elapsed);
+  const eased=t*t*(3-2*t);
+  ball.position.lerpVectors(ballStart,ballEnd,eased);
+  ball.position.y+=Math.sin(t*Math.PI)*0.6;
+  ball.rotation.x+=dt*10;
+  ball.rotation.z+=dt*4;
+
+  if(shotResult&&shotResult.diveX!==undefined){
+   keeper.position.x=shotResult.diveX*Math.min(1,t*1.9);
+   keeper.rotation.z=(shotResult.diveX>0?-0.6:0.6)*Math.min(1,t*1.9);
+  }
+
+  if(t>=1){
+   shotStart=null;
+   finishPlayerShot();
+  }
+ }
+
+ renderer.render(scene,camera);
+}
+
+function roster(){ return rosters[$("myTeam").value]; }
+function opponentRoster(){ return rosters[$("opTeam").value]; }
+function currentPlayer(){ return roster()[myKicks%10]; }
+
+function updateUI(){
+ $("myName").textContent=$("myTeam").value;
+ $("opName").textContent=$("opTeam").value;
+ $("myScore").textContent=myScore;
+ $("opScore").textContent=opScore;
+ $("myGoals").textContent=myScore;
+ $("opGoals").textContent=opScore;
+ $("saves").textContent=saves;
+ $("playerName").textContent=finished?"Match complete":currentPlayer();
+ $("playerTeam").textContent=$("myTeam").value+" · Penalty taker";
+ $("kickNo").textContent=suddenDeath?"SUDDEN DEATH":"KICK "+(myKicks+1);
+ $("phase").textContent=finished?"MATCH FINISHED":
+  suddenDeath?"⚡ SUDDEN DEATH":"3D STADIUM · KICK "+(myKicks+1)+" OF 10";
+ $("kickBtn").disabled=busy||finished;
+ renderPlayers();
+}
+
+function renderPlayers(){
+ const container=$("players");
+ container.innerHTML="";
+ roster().forEach((name,i)=>{
+  const chip=document.createElement("span");
+  chip.className="chip";
+  chip.textContent=(i+1)+". "+name;
+  if(i<Math.min(myKicks,10))chip.classList.add("done");
+  if(i===myKicks%10&&!finished)chip.classList.add("active");
+  container.appendChild(chip);
+ });
+}
+
+function resetVisuals(){
+ ball.position.copy(ballStart);
+ keeper.position.set(0,0,-11.6);
+ keeper.rotation.set(0,0,0);
+ player.position.set(0,0,4.3);
+ aimMarker.position.set(aim.x,aim.y,-11.85);
+}
+
+function setMessage(text){ $("message").textContent=text; }
+
+function finishMatch(text){
+ finished=true;
+ busy=false;
+ setMessage(text+" Final score: "+myScore+" - "+opScore);
+ updateUI();
+}
+
+function finishPlayerShot(){
+ const result=shotResult;
+ shotResult=null;
+
+ if(result.outside){
+  setMessage("❌ MISS! The shot goes wide.");
+ }else if(result.saved){
+  saves++;
+  setMessage("🧤 SAVED! World-class save by the goalkeeper.");
+ }else{
+  myScore++;
+  setMessage("⚽ GOAL! Unstoppable shot into the net!");
+ }
+
+ myKicks++;
+ updateUI();
+
+ setTimeout(opponentKick,900);
+}
+
+function opponentKick(){
+ if(finished)return;
+
+ const name=opponentRoster()[opKicks%10];
+ setMessage(name+" is stepping up for the opponent...");
+
+ const goal=Math.random()<0.73;
+ opKicks++;
+
+ if(goal){
+  opScore++;
+  setMessage("⚽ "+name+" scores!");
+ }else{
+  saves++;
+  setMessage("🧤 Brilliant save! Opponent misses!");
+ }
+
+ updateUI();
+
+ if(myKicks===opKicks){
+  if(myKicks>=10){
+   if(myScore!==opScore){
+    finishMatch(myScore>opScore?"🏆 YOU WIN THE SHOOTOUT!":"🏆 OPPONENT WINS!");
+    return;
+   }
+   suddenDeath=true;
+   setMessage("⚡ SUDDEN DEATH! Next round decides the winner.");
+  }else{
+   const myRemaining=10-myKicks;
+   const opRemaining=10-opKicks;
+   if(myScore>opScore+opRemaining){
+    finishMatch("🏆 YOU WIN! Opponent cannot catch up.");
+    return;
+   }
+   if(opScore>myScore+myRemaining){
+    finishMatch("🏆 OPPONENT WINS!");
+    return;
+   }
+  }
+
+  if(suddenDeath&&myKicks>10&&myScore!==opScore){
+   finishMatch(myScore>opScore?"🏆 YOU WIN SUDDEN DEATH!":"🏆 OPPONENT WINS SUDDEN DEATH!");
+   return;
+  }
+ }
+
+ busy=false;
+ updateUI();
+ if(suddenDeath){
+  setMessage("⚡ Sudden Death! Your next taker: "+currentPlayer());
+ }else{
+  setMessage("Your turn! "+currentPlayer()+" is ready.");
+ }
+}
+
+function takePenalty(){
+ if(busy||finished)return;
+ busy=true;
+ $("kickBtn").disabled=true;
+
+ const power=Number($("power").value);
+ const inside=aim.x>=-3.5&&aim.x<=3.5&&aim.y>=0.1&&aim.y<=2.35;
+ const diveX=(Math.random()*6.0)-3.0;
+ const goalkeeperSaves=Math.random()<0.45;
+ const saved=inside&&goalkeeperSaves&&Math.abs(aim.x-diveX)<1.0;
+
+ ballStart=ball.position.clone();
+ ballEnd=new THREE.Vector3(aim.x,aim.y,-11.9);
+ shotResult={outside:!inside,saved,diveX};
+ shotDuration=950-(power*3.8);
+ shotStart=performance.now();
+
+ aimMarker.position.set(aim.x,aim.y,-11.85);
+ setMessage(currentPlayer()+" takes a powerful shot!");
+}
+
+canvas.addEventListener("pointerdown",event=>{
+ if(busy||finished||!scene)return;
+ const rect=canvas.getBoundingClientRect();
+ const nx=(event.clientX-rect.left)/rect.width;
+ const ny=(event.clientY-rect.top)/rect.height;
+
+ aim.x=THREE.MathUtils.clamp((nx-0.5)*7.2,-3.6,3.6);
+ aim.y=THREE.MathUtils.clamp((1-ny)*3.0,0.15,2.9);
+ aimMarker.position.set(aim.x,aim.y,-11.85);
+});
+
+$("power").addEventListener("input",()=>{
+ $("powerValue").textContent=$("power").value+"%";
+});
+
+function newMatch(){
+ myScore=0;opScore=0;saves=0;
+ myKicks=0;opKicks=0;
+ suddenDeath=false;finished=false;busy=false;
+ aim={x:0,y:1.5};
+ shotStart=null;shotResult=null;
+ resetVisuals();
+ updateUI();
+ setMessage("New eFootball match! Choose your target and shoot.");
+}
+
+$("kickBtn").addEventListener("click",takePenalty);
+$("resetBtn").addEventListener("click",newMatch);
+
+$("myTeam").addEventListener("change",()=>{
+ if($("myTeam").value===$("opTeam").value){
+  $("opTeam").selectedIndex=($("myTeam").selectedIndex+1)%$("opTeam").options.length;
+ }
+ if(player){
+  scene.remove(player);
+  player=createProPlayer(0,0,4.3,colors[$("myTeam").value]||0xa50044,false);
+ }
+ newMatch();
+});
+
+$("opTeam").addEventListener("change",()=>{
+ if($("myTeam").value===$("opTeam").value){
+  $("opTeam").selectedIndex=($("myTeam").selectedIndex+1)%$("myTeam").options.length;
+ }
+ newMatch();
+});
+
+try{
+ makeStadium();
+ updateUI();
+ loading.style.display="none";
+}catch(error){
+ console.error(error);
+ loading.style.pointerEvents="auto";
+ loading.innerHTML="3D game could not start.<br>Please refresh the page.";
+ setMessage("Could not load 3D graphics.");
+}
+</script>
+</body>
+</html>
